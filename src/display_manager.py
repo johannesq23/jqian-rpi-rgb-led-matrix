@@ -56,7 +56,7 @@ class Manager:
       mainfont.LoadFont("../rpi-rgb-led-matrix-master/fonts/helvR12.bdf")
 
       text_color = graphics.Color(255, 255, 255)
-      graphics.DrawText(canvas, mainfont, x_pos , 16 - 4, "255, 255, 255", "2nd Av To Jamaica 179-St")
+      graphics.DrawText(canvas, mainfont, x_pos , 16 - 4, text_color, "2nd Av To Jamaica 179-St")
 
       for i in range(self.height // 2):
         for j in range(self.height):
