@@ -48,6 +48,7 @@ class Manager:
     # image = Image.open("../assets/png/f.png").convert('RGB')
 
     x_pos = 16 - self.text_offset
+    first_disp = True
     while True:
       x_pos -= 1
       image = Image.open("../assets/f.png").convert("RGB")
@@ -66,7 +67,12 @@ class Manager:
 
       canvas = self.matrix.SwapOnVSync(canvas)
 
+      if first_disp:
+        time.sleep(4)
+        first_disp = False
       time.sleep(0.025)
+      
+      
 
 
     
