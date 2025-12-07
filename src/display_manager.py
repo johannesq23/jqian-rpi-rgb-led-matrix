@@ -50,7 +50,7 @@ class Manager:
     x_pos = 16 - self.text_offset
     while True:
       x_pos -= 1
-      image = Image.open("../assets/f.png")
+      image = Image.open("../assets/f.png").convert("RGB")
       canvas = self.matrix.CreateFrameCanvas()
       mainfont = graphics.Font()
       mainfont.LoadFont("../rpi-rgb-led-matrix-master/fonts/helvR12.bdf")
