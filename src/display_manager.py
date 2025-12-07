@@ -66,7 +66,7 @@ class Manager:
 
       canvas = self.matrix.SwapOnVSync(canvas)
 
-      time.sleep(0.05)
+      time.sleep(0.025)
 
 
     
