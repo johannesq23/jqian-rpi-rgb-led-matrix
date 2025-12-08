@@ -120,6 +120,7 @@ class Manager:
           x_pos = 16 - self.text_offset
           first_disp = True
       time.sleep(0.05)
+    canvas.Fill(0, 0, 0)
 
   def main_control_loop(self, subway_ids):
     for id in subway_ids:
