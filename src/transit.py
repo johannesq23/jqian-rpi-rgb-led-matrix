@@ -7,6 +7,8 @@ class Transit:
   def __init__(self):
     self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
 
+    self.end_stations_by_trip_id = {}
+
   def get_times_by_id(self, id: str):
     # Fetch the feed
     resp = requests.get(self.url)
@@ -25,7 +27,6 @@ class Transit:
       trip_update = entity.get("tripUpdate", {})
       if not trip_update:
         continue
-      
       trip_id = trip_update.get("trip", {}).get("tripId", "unknown")
       route_id = trip_update.get("trip", {}).get("routeId")
       
@@ -37,7 +38,7 @@ class Transit:
           # convert to human-readable
           if departure:
             departure_time = time.strftime('%H:%M:%S', time.localtime(int(departure)))
-            time_till_departure = (int(departure) - int(time.time())) // 60
+            time_till_departure = max((int(departure) - int(time.time())) // 60, 0)
           else:
             departure_time = None
             time_till_departure = None
@@ -45,8 +46,8 @@ class Transit:
           departures.append({
             "trip_id": trip_id,
             "route": route_id,
-            "departure_time": departure_time,
-            "time_till_departure_mins": time_till_departure
+            "departure_time": str(departure_time),
+            "time_till_departure_mins": str(time_till_departure)
           })
 
     return departures
@@ -56,4 +57,6 @@ class Transit:
 
 
 transit = Transit()
-transit.get_times_by_id("F14N")
+times = transit.get_times_by_id("F14N")
+for entry in times:
+  print(entry)
