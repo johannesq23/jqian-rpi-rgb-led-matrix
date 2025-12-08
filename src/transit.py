@@ -2,12 +2,24 @@ import requests
 from google.transit import gtfs_realtime_pb2
 from google.protobuf.json_format import MessageToDict
 import time
+import csv
 
 class Transit:
   def __init__(self):
     self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
+    self.id_to_stop_dict = self._load_id_list()
+    
+  def _load_id_list(self):
+    data = {}
+    with open("../gtfs_subway/stops.txt", newline="") as f:
+      reader = csv.DictReader(f)
+      for row in reader:
+        row_dict = dict(row)
+        data[row_dict.get("stop_id", "")] = row_dict.get("stop_name", "")
+    return data
 
-    self.end_stations_by_trip_id = {}
+  def get_stop_by_id(self, id: str):
+    return self.id_to_stop_dict[id]
 
   def get_times_by_id(self, id: str):
     # Fetch the feed
@@ -30,10 +42,12 @@ class Transit:
       trip_id = trip_update.get("trip", {}).get("tripId", "unknown")
       route_id = trip_update.get("trip", {}).get("routeId")
       
-      for stu in trip_update.get("stopTimeUpdate", []):
+      stop_time_update = trip_update.get("stopTimeUpdate", [])
+      for stu in stop_time_update:
         stop_id = stu.get("stopId")
         if stop_id == id:
           departure = stu.get("departure", {}).get("time")
+          last_stop_id = self.id_to_stop_dict.get(stop_time_update[-1].get("stopId", ""), "")
           
           # convert to human-readable
           if departure:
@@ -47,16 +61,14 @@ class Transit:
             "trip_id": trip_id,
             "route": route_id,
             "departure_time": str(departure_time),
-            "time_till_departure_mins": str(time_till_departure)
+            "time_till_departure_mins": str(time_till_departure),
+            "final_stop": last_stop_id
           })
 
     return departures
-  
-  def get_next_two_times_by_id(self, id: str):
-    return self.get_times_by_id(id)[:2]
 
 
-transit = Transit()
-times = transit.get_times_by_id("F14N")
-for entry in times:
-  print(entry)
+# transit = Transit()
+# times = transit.get_times_by_id("F14N")
+# for entry in times:
+#   print(entry)

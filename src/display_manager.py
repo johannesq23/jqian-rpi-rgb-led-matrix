@@ -47,19 +47,29 @@ class Manager:
   def text_offset(self):
     return 2
 
-  def draw_subway(self):
-    # image = Image.open("../assets/png/f.png").convert('RGB')
+  def draw_subway(self, id, duration=15):
+    end_time = time.time() + duration
+
     x_pos = 16 - self.text_offset
     first_disp = True
 
-    stop_info = self.transit.get_next_two_times_by_id("F14N")
-    if len(stop_info) == 2:
-      first_time_mins = stop_info[0].get("time_till_departure_mins", "_")
-      second_time_mins = stop_info[1].get("time_till_departure_mins", "_")
-    else:
-      first_time_mins, second_time_mins = "_", "_"
-    first_time_mins += "min"
-    second_time_mins += "min"
+    stop_info = self.transit.get_times_by_id(id)
+
+    def extract_time(entry):
+      if not isinstance(entry, dict):
+        return "_min"
+      return f"{entry.get('time_till_departure_mins', '_')}min"
+    def extract_final_stop(entry):
+      if not isinstance(entry, dict):
+        return ""
+      return entry.get('final_stop', "")
+
+    # Safely pick two entries (or placeholders)
+    entries = (stop_info + [{}, {}])[:2]
+
+    first_time_mins  = extract_time(entries[0])
+    second_time_mins = extract_time(entries[1])
+    final_stop = extract_final_stop(entries[0])
 
     canvas = self.matrix.CreateFrameCanvas()
     text_font = graphics.Font()
@@ -68,20 +78,21 @@ class Manager:
     text_color = graphics.Color(255, 255, 255)
     time_color = graphics.Color(0, 200, 17)
 
-    text_width = graphics.DrawText(canvas, text_font, 0, 0, text_color, "Jamaica 179-St")
+    text_width = graphics.DrawText(canvas, text_font, 0, 0, text_color, final_stop)
     time_width = graphics.DrawText(canvas, text_font, 0, 0, time_color, first_time_mins)
     time_width += 2
 
     scroll = (self.width - self.height // 2 - time_width) < text_width
 
-    while True:
-      image = Image.open("../assets/f.png").convert("RGB")
+    image = Image.open("../assets/f.png").convert("RGB")
+
+
+    while time.time() < end_time:
       canvas = self.matrix.CreateFrameCanvas()
 
-      graphics.DrawText(canvas, text_font, x_pos, 16 - 4, text_color, "Jamaica 179-St")
-      
-      x = self.width - time_width
+      graphics.DrawText(canvas, text_font, x_pos, 16 - 4, text_color, final_stop)
 
+      x = self.width - time_width
 
       # Draw Black Rectangle for logo
       for i in range(self.height // 2):
@@ -108,8 +119,14 @@ class Manager:
           x_pos = 16 - self.text_offset
           first_disp = True
       time.sleep(0.05)
+
+  def main_control_loop(self, subway_ids):
+    for id in subway_ids:
+      self.draw_subway(id)
+      print(id)
+
     
 
 manager = Manager()
-manager.draw_subway()
-time.sleep(100)
+while True:
+  manager.main_control_loop(["F14N", "F14S"])
