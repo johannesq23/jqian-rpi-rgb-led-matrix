@@ -45,7 +45,7 @@ class Manager:
     
   @property
   def text_offset(self):
-    return 2
+    return 1
 
   def draw_subway(self, id, duration=15):
     end_time = time.time() + duration
