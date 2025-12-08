@@ -88,6 +88,8 @@ class Manager:
 
 
     while time.time() < end_time:
+      canvas.Fill(0, 0, 0)
+
 
       graphics.DrawText(canvas, text_font, x_pos, 16 - 4, text_color, final_stop)
 
@@ -109,7 +111,7 @@ class Manager:
       canvas = self.matrix.SwapOnVSync(canvas)
 
       if first_disp:
-        time.sleep(4)
+        time.sleep(2)
         first_disp = False
       if scroll:
         x_pos -= 1
