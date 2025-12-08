@@ -88,7 +88,6 @@ class Manager:
 
 
     while time.time() < end_time:
-      canvas = self.matrix.CreateFrameCanvas()
 
       graphics.DrawText(canvas, text_font, x_pos, 16 - 4, text_color, final_stop)
 
