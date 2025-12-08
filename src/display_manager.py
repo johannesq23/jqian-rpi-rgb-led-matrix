@@ -1,8 +1,8 @@
 import os
-if os.getenv("EMULATOR", "false") == "true": # change this before pushing
-  from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions, graphics
-else:
-  from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
+# if os.getenv("EMULATOR", "false") == "true": # change this before pushing
+#   from RGBMatrixEmulator import RGBMatrix, RGBMatrixOptions, graphics
+# else:
+#   from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 
 import time
 from PIL import Image, ImageDraw, ImageFont
