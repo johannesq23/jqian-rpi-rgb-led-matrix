@@ -6,7 +6,14 @@ import csv
 
 class Transit:
   def __init__(self):
-    self.url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
+    self.url_list = {
+      "F": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
+      "B": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
+      "D": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
+      "M": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm",
+      "1": "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs",
+    }
+    self.default_url = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-bdfm"
     self.id_to_stop_dict = self._load_id_list()
     
   def _load_id_list(self):
@@ -23,7 +30,8 @@ class Transit:
 
   def get_times_by_id(self, id: str):
     # Fetch the feed
-    resp = requests.get(self.url)
+    url = self.url_list.get(id[0], self.default_url)
+    resp = requests.get(url)
 
     # Parse protobuf
     feed = gtfs_realtime_pb2.FeedMessage()
