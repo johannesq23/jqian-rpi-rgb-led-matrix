@@ -7,7 +7,7 @@ else:
 import time
 from PIL import Image, ImageDraw, ImageFont
 import io
-from transit import Transit
+from transit_new import TransitClient
 import threading
 
 class TransitCache:
@@ -22,24 +22,24 @@ class TransitCache:
   def _fetch_loop(self):
     while self.running:
       ids = self.cache.keys()
-      for stop_id in ids:
+      for id in ids:
         try:
-          data = self.transit.get_times_by_id(stop_id)
+          data = self.transit.get_transit(id)
           with self.lock:
-            self.cache[stop_id] = data
+            self.cache[id] = data
         except Exception as e:
           print("Fetch error:", e)
       time.sleep(self.refresh_interval)
   
-  def register(self, stop_id):
+  def register(self, id_tuple):
     with self.lock:
-      if stop_id not in self.cache:
-        self.cache[stop_id] = []
+      if id_tuple not in self.cache:
+        self.cache[id_tuple] = []
 
     try:
-      data = self.transit.get_times_by_id(stop_id)
+      data = self.transit.get_transit(id_tuple)
       with self.lock:
-        self.cache[stop_id] = data
+        self.cache[id_tuple] = data
     except:
       pass
 
@@ -48,9 +48,47 @@ class TransitCache:
       return list(self.cache.get(stop_id, []))
     
 
+class RowUtils:
+  _image_cache = {
+    "1": Image.open("../assets/1.png").convert("RGB"),
+    "2": Image.open("../assets/2.png").convert("RGB"),
+    "3": Image.open("../assets/3.png").convert("RGB"),
+    "4": Image.open("../assets/4.png").convert("RGB"),
+    "5": Image.open("../assets/5.png").convert("RGB"),
+    "6": Image.open("../assets/6.png").convert("RGB"),
+    "a": Image.open("../assets/a.png").convert("RGB"),
+    "b": Image.open("../assets/b.png").convert("RGB"),
+    "c": Image.open("../assets/c.png").convert("RGB"),
+    "d": Image.open("../assets/d.png").convert("RGB"),
+    "e": Image.open("../assets/e.png").convert("RGB"),
+    "f": Image.open("../assets/f.png").convert("RGB"),
+    "j": Image.open("../assets/f.png").convert("RGB"), # CHANGE
+  }
+  _final_stops = {
+    "2": {"N": "Wakefield-241 St", "S": "Flatbush Ave-Brooklyn College"},
+    "3": {"N": "Harlem-148 St", "S": "New Lots Ave"},
+    "4": {"N": "Woodlawn", "S": "Crown Heights-Utica Ave"},
+    "5": {"N": "Eastchester-Dyre Ave", "S": "Flatbush Ave-Brooklyn College"},
+    "A": {"N": "Inwood-207 St", "S": "Far Rockaway-Mott Ave"},
+    "C": {"N": "168 St", "S": "Euclid Ave"},
+    "J": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
+    "Z": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
+  }
+  @classmethod
+  def get_image_cache(cls):
+    return cls._image_cache
+
+  @classmethod
+  def get_image(cls, key):
+    return cls.get_image_cache()[key]
+  
+  @classmethod
+  def get_final_stop(cls, dir, key):
+    return cls._final_stops[key][dir]
+
 
 class Row:
-  def __init__(self, canvas, text_font, top, width, height, stop_info, logo):
+  def __init__(self, canvas, text_font, top, width, height, stop_info):
     self.width = width
     self.height = height
     self.text_font = text_font
@@ -59,13 +97,11 @@ class Row:
     self.first_disp = True
     self.first_disp_time = time.time()
 
-    stop_info = stop_info
-
-    entries = (stop_info + [{}, {}])[:2]
-    self.first_time_mins  = self.extract_time(entries[0])
-    second_time_mins = self.extract_time(entries[1])
-    self.final_stop = self.extract_final_stop(entries[0])
-    self.logo = logo
+    entries = stop_info
+    self.first_time_mins  = self.format_time(entries[0][0])
+    self.final_stop = self.extract_final_stop(line=entries[0][2], dir=entries[0][1])
+    
+    self.logo = self.extract_logo(line=entries[0][2])
 
     self.text_width = graphics.DrawText(canvas, self.text_font, 0, 0, graphics.Color(0,0,0), self.final_stop)
     self.time_width = graphics.DrawText(canvas, self.text_font, 0, 0, graphics.Color(0,0,0), self.first_time_mins)
@@ -107,20 +143,13 @@ class Row:
   def text_offset(self):
     return 1
   
-  def extract_time(self, entry):
-    if not isinstance(entry, dict):
-      return "_min"
-    return f"{entry.get('time_till_departure_mins', '_')}min"
-  def extract_final_stop(self, entry):
-    if not isinstance(entry, dict):
-      return "_"
-    return entry.get("final_stop", "_")
-  def extract_route_id(self, entry):
-    if not isinstance(entry, dict):
-      return "_"
-    return entry.get("route", "_")
-
-
+  def format_time(self, entry):
+    return f"{entry}min"
+  def extract_final_stop(self, dir, line):
+    return RowUtils.get_final_stop(dir, line)
+  def extract_logo(self, line):
+    return RowUtils.get_image(line)
+  
 
 class Manager:
   def __init__(self):
@@ -134,21 +163,9 @@ class Manager:
 
     self.matrix = RGBMatrix(options=options)
 
-    self.transit = Transit()
+    self.transit = TransitClient("http://127.0.0.1:5000")
     self.text_font = graphics.Font()
     self.text_font.LoadFont("../rpi-rgb-led-matrix-master/fonts/helvR12.bdf")
-    self.image_cache = {"1": Image.open("../assets/1.png").convert("RGB"),
-                        "2": Image.open("../assets/2.png").convert("RGB"),
-                        "3": Image.open("../assets/3.png").convert("RGB"),
-                        "4": Image.open("../assets/4.png").convert("RGB"),
-                        "5": Image.open("../assets/5.png").convert("RGB"),
-                        "6": Image.open("../assets/6.png").convert("RGB"),
-                        "a": Image.open("../assets/a.png").convert("RGB"),
-                        "b": Image.open("../assets/b.png").convert("RGB"),
-                        "c": Image.open("../assets/c.png").convert("RGB"),
-                        "d": Image.open("../assets/d.png").convert("RGB"),
-                        "e": Image.open("../assets/e.png").convert("RGB"),
-                        "f": Image.open("../assets/f.png").convert("RGB"),}
     self.cache = TransitCache(self.transit, 10)
 
   @property
@@ -167,11 +184,11 @@ class Manager:
     else:
       return 32
 
-  def draw_subway_combined(self, id_1, id_2, canvas, duration=15):
+  def draw_subway_combined(self, info_1, info_2, canvas, duration=15):
     end_time = time.time() + duration
 
-    row_1 = Row(canvas, self.text_font, True, self.width, self.height, self.cache.get(id_1), self.image_cache.get(id_1[0].lower()))
-    row_2 = Row(canvas, self.text_font, False, self.width, self.height, self.cache.get(id_2), self.image_cache.get(id_2[0].lower()))
+    row_1 = Row(canvas, self.text_font, True, self.width, self.height, info_1)
+    row_2 = Row(canvas, self.text_font, False, self.width, self.height, info_2)
 
     while time.time() < end_time:
       canvas.Fill(0, 0, 0)
@@ -189,10 +206,12 @@ class Manager:
       self.cache.register(id)
 
     while True:
-      for i in range(0, len(subway_ids), 2):
-        self.draw_subway_combined(id_1=subway_ids[i], id_2=subway_ids[i + 1], canvas=canvas, duration=15)      
+      valid_data = [(info) for sid in subway_ids if (info := self.cache.get(sid))]
 
+      i = 0
+      while i < len(valid_data):
+        self.draw_subway_combined(valid_data[i], valid_data[i + 1 % len(valid_data)], canvas=canvas, duration=15)
+        i += 2
     
-
 manager = Manager()
-manager.main_control_loop(["F14N", "F14S", "135N", "135S"])
+manager.main_control_loop([("229", "N", ("4", "5")), ("229", "N", ("2", "3")), ("229", "N", ("4")), ("229", "N", ("2")), ("229", "N", ("5")), ("229", "N", ("3"))])
