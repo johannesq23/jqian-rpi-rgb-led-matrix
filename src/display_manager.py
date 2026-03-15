@@ -210,7 +210,7 @@ class Manager:
 
       i = 0
       while i < len(valid_data):
-        self.draw_subway_combined(valid_data[i], valid_data[i + 1 % len(valid_data)], canvas=canvas, duration=15)
+        self.draw_subway_combined(valid_data[i], valid_data[(i + 1) % len(valid_data)], canvas=canvas, duration=15)
         i += 2
     
 manager = Manager()
