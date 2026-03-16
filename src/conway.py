@@ -26,20 +26,22 @@ class Manager:
   def run_test(self):
     canvas = self.matrix.CreateFrameCanvas()
     t = 0
+    for x in range(self.matrix.width):
+      for y in range(self.matrix.height):
+
+        r = int((math.sin((x + t) * 0.05) + 1) * 127)
+        g = int((math.sin((y + t) * 0.05) + 1) * 127)
+        b = int((math.sin((x + y + t) * 0.05) + 1) * 127)
+
+        canvas.SetPixel(x, y, r, g, b)
+
+    canvas = self.matrix.SwapOnVSync(canvas)
 
     while True:
-      for x in range(self.matrix.width):
-        for y in range(self.matrix.height):
+      time.sleep(10)
 
-          r = int((math.sin((x + t) * 0.05) + 1) * 127)
-          g = int((math.sin((y + t) * 0.05) + 1) * 127)
-          b = int((math.sin((x + y + t) * 0.05) + 1) * 127)
-
-          canvas.SetPixel(x, y, r, g, b)
-
-      canvas = self.matrix.SwapOnVSync(canvas)
-      t += 1
-      time.sleep(0.02)
+      # t += 1
+      # time.sleep(0.02)
 
 if __name__ == "__main__":
   manager = Manager()
