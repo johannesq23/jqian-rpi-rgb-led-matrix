@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RGB Matrix Control</title>
+</head>
+<body style="font-family: sans-serif; text-align:center; margin-top:50px;">
+  <h2>RGB Matrix Brightness</h2>
+  <input type="range" id="brightness" min="0" max="100" value="{{ brightness }}" oninput="updateBrightness(this.value)">
+  <p>Brightness: <span id="value">{{ brightness }}</span>%</p>
+
+  <script>
+    function updateBrightness(val) {
+      document.getElementById("value").innerText = val;
+
+      fetch("/set_brightness", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "brightness=" + val
+      });
+    }
+  </script>
+</body>
+</html>
