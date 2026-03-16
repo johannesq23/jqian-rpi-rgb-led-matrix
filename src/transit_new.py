@@ -40,7 +40,7 @@ class TransitClient:
         now = datetime.now(dt.tzinfo)
         delta = dt - now
         minned = max(0, int(delta.total_seconds() / 60))
-        if minned > 0:
+        if minned > 7:
           output.append((minned, dir, str.lower(line)))
 
     return sorted(output)

@@ -62,17 +62,17 @@ class RowUtils:
     "d": Image.open("../assets/d.png").convert("RGB"),
     "e": Image.open("../assets/e.png").convert("RGB"),
     "f": Image.open("../assets/f.png").convert("RGB"),
-    "j": Image.open("../assets/f.png").convert("RGB"), # CHANGE
+    "j": Image.open("../assets/j.png").convert("RGB"), # CHANGE
   }
   _final_stops = {
     "2": {"N": "Wakefield-241 St", "S": "Flatbush Ave-Brooklyn College"},
     "3": {"N": "Harlem-148 St", "S": "New Lots Ave"},
     "4": {"N": "Woodlawn", "S": "Crown Heights-Utica Ave"},
     "5": {"N": "Eastchester-Dyre Ave", "S": "Flatbush Ave-Brooklyn College"},
-    "A": {"N": "Inwood-207 St", "S": "Far Rockaway-Mott Ave"},
-    "C": {"N": "168 St", "S": "Euclid Ave"},
-    "J": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
-    "Z": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
+    "a": {"N": "Inwood-207 St", "S": "Far Rockaway-Mott Ave"},
+    "c": {"N": "168 St", "S": "Euclid Ave"},
+    "j": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
+    "z": {"N": "Jamaica Center-Parsons/Archer", "S": "Broad St"},
   }
   @classmethod
   def get_image_cache(cls):
@@ -214,4 +214,4 @@ class Manager:
         i += 2
     
 manager = Manager()
-manager.main_control_loop([("229", "N", ("4", "5")), ("229", "N", ("2", "3")), ("229", "N", ("4")), ("229", "N", ("2")), ("229", "N", ("5")), ("229", "N", ("3"))])
+manager.main_control_loop([("229", "N", ("4", "5")), ("229", "N", ("2", "3")), ("229", "N", ("A", "C")), ("229", "N", ("J"))])
