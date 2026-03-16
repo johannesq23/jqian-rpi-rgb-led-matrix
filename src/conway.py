@@ -8,6 +8,9 @@ import time
 
 import time
 
+import time
+import math
+
 class Manager:
   def __init__(self):
     options = RGBMatrixOptions()
@@ -22,19 +25,21 @@ class Manager:
 
   def run_test(self):
     canvas = self.matrix.CreateFrameCanvas()
-    
-    # Draw a simple color gradient across the matrix
-    for x in range(self.matrix.width):
-      for y in range(self.matrix.height):
-        r = int((x / self.matrix.width) * 255)
-        g = int((y / self.matrix.height) * 255)
-        b = 128
-        canvas.SetPixel(x, y, r, g, b)
-    
-    # Swap the canvas to display
-    canvas = self.matrix.SwapOnVSync(canvas)
-    print("Test pattern displayed for 10 seconds...")
-    time.sleep(10)
+    t = 0
+
+    while True:
+      for x in range(self.matrix.width):
+        for y in range(self.matrix.height):
+
+          r = int((math.sin((x + t) * 0.05) + 1) * 127)
+          g = int((math.sin((y + t) * 0.05) + 1) * 127)
+          b = int((math.sin((x + y + t) * 0.05) + 1) * 127)
+
+          canvas.SetPixel(x, y, r, g, b)
+
+      canvas = self.matrix.SwapOnVSync(canvas)
+      t += 1
+      time.sleep(0.02)
 
 if __name__ == "__main__":
   manager = Manager()
